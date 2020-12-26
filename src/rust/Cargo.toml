@@ -1,5 +1,5 @@
 [package]
-name = "bst-rust"
+name = "bst"
 version = "0.1.0"
 authors = ["figsoda <fisgoda@pm.me>"]
 edition = "2018"

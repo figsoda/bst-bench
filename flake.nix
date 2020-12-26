@@ -20,8 +20,7 @@
           --export-json results.json \
           ${
             concatStringsSep " " (attrValues
-              (mapAttrs (k: v: "-n ${k} ${v}/bin/${v.pname}")
-                packages.${system}))
+              (mapAttrs (k: v: "-n ${k} ${v}/bin/bst") packages.${system}))
           }
       '';
       packages.${system} = {
@@ -29,18 +28,17 @@
           ghc = pkgs.haskellPackages.ghcWithPackages
             (haskellPackages: [ haskellPackages.containers ]);
         in pkgs.stdenv.mkDerivation {
-          pname = "bst-haskell";
-          version = "0.1.0";
+          name = "bst-haskell";
           src = ./src/haskell;
           buildInputs = [ ghc ];
-          buildPhase = "ghc Main.hs -O2 -o bst-haskell";
+          buildPhase = "ghc Main.hs -O2 -o bst";
           installPhase = ''
             mkdir -p $out/bin
-            cp bst-haskell $out/bin
+            cp bst $out/bin
           '';
         };
         rust = naersk.lib.${system}.buildPackage {
-          pname = "bst-rust";
+          name = "bst-rust";
           src = ./src/rust;
         };
       };
