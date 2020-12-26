@@ -24,13 +24,11 @@
           }
       '';
       packages.${system} = {
-        haskell = let
-          ghc = pkgs.haskellPackages.ghcWithPackages
-            (haskellPackages: [ haskellPackages.containers ]);
-        in pkgs.stdenv.mkDerivation {
+        haskell = pkgs.stdenv.mkDerivation {
           name = "bst-haskell";
           src = ./src/haskell;
-          buildInputs = [ ghc ];
+          buildInputs =
+            [ (pkgs.haskellPackages.ghcWithPackages (hs: [ hs.containers ])) ];
           buildPhase = "ghc Main.hs -O2 -o bst";
           installPhase = ''
             mkdir -p $out/bin
