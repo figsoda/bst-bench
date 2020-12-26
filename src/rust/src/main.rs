@@ -5,4 +5,5 @@ fn main() {
     for x in 0 .. 1000000 {
         set.insert(x);
     }
+    println!("{}", set.len());
 }
