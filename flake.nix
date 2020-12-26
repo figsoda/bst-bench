@@ -42,7 +42,7 @@
             name = "bst-haskell";
             src = ./src/haskell;
             buildInputs = [
-              (pkgs.haskellPackages.ghcWithPackages (hs: [ hs.containers ]))
+              (pkgs.haskellPackages.ghcWithPackages (ps: [ ps.containers ]))
             ];
             buildPhase = "ghc Main.hs -O2 -o bst";
             installPhase = ''
