@@ -20,9 +20,13 @@
             --export-json results.json \
             ${
               concatStringsSep " "
-              (attrValues (mapAttrs (k: v: "-n ${k} ${v}/bin/bst") packages))
+              (attrValues (mapAttrs (k: v: "-n ${k} ${v.program}") apps))
             }
         '';
+        apps = mapAttrs (_: v: {
+          type = "app";
+          program = "${v}/bin/bst";
+        }) packages;
         packages = {
           haskell = pkgs.stdenv.mkDerivation {
             name = "bst-haskell";
