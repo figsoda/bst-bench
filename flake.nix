@@ -18,6 +18,7 @@
             -S ${pkgs.dash}/bin/dash \
             -u millisecond \
             --export-json results.json \
+            --export-markdown results.md \
             ${
               concatStringsSep " "
               (attrValues (mapAttrs (k: v: "-n ${k} ${v.program}") apps))
