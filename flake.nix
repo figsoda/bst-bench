@@ -28,6 +28,14 @@
           program = "${v}/bin/bst";
         }) packages;
         packages = {
+          go = pkgs.buildGoModule rec {
+            name = "bst-go";
+            src = builtins.path {
+              name = "bst";
+              path = ./src/go;
+            };
+            vendorSha256 = "ftiIGuIlyr766TClPwP9NYhPZqneWI+Sk2f7doR/YsA=";
+          };
           haskell = pkgs.stdenv.mkDerivation {
             name = "bst-haskell";
             src = ./src/haskell;
