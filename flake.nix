@@ -25,6 +25,20 @@
           }
       '';
       packages.${system} = {
+        haskell = let
+          ghc = pkgs.haskellPackages.ghcWithPackages
+            (haskellPackages: [ haskellPackages.containers ]);
+        in pkgs.stdenv.mkDerivation {
+          pname = "bst-haskell";
+          version = "0.1.0";
+          src = ./src/haskell;
+          buildInputs = [ ghc ];
+          buildPhase = "ghc Main.hs -O2 -o bst-haskell";
+          installPhase = ''
+            mkdir -p $out/bin
+            cp bst-haskell $out/bin
+          '';
+        };
         rust = naersk.lib.${system}.buildPackage {
           pname = "bst-rust";
           src = ./src/rust;
