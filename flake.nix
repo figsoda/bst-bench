@@ -15,6 +15,7 @@
         defaultPackage = pkgs.writeScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
             -w 3 -r 32 \
+            -s none \
             -S ${pkgs.dash}/bin/dash \
             -u millisecond \
             --export-json results.json \
