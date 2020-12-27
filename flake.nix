@@ -12,6 +12,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
+
         defaultPackage = pkgs.writeScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
             -w 3 -r 32 \
@@ -25,10 +26,12 @@
               (attrValues (mapAttrs (k: v: "-n ${k} ${v.program}") apps))
             }
         '';
+
         apps = mapAttrs (_: v: {
           type = "app";
           program = "${v}/bin/bst";
         }) packages;
+
         packages = {
           go = pkgs.buildGoModule rec {
             name = "bst-go";
@@ -38,6 +41,7 @@
             };
             vendorSha256 = "ftiIGuIlyr766TClPwP9NYhPZqneWI+Sk2f7doR/YsA=";
           };
+
           haskell = pkgs.stdenv.mkDerivation {
             name = "bst-haskell";
             src = ./src/haskell;
@@ -50,6 +54,7 @@
               cp bst $out/bin
             '';
           };
+
           java = pkgs.stdenv.mkDerivation {
             name = "bst-java";
             src = ./src/java;
@@ -62,6 +67,7 @@
                 --add-flags "-cp $out/share/java Main"
             '';
           };
+
           python = pkgs.writeTextFile {
             name = "bst-python";
             destination = "/bin/bst";
@@ -72,6 +78,7 @@
               ${readFile ./src/python/main.py}
             '';
           };
+
           rust = naersk.lib.${system}.buildPackage {
             name = "bst-rust";
             src = ./src/rust;
