@@ -1,14 +1,22 @@
 {
   inputs = {
+    collections = {
+      url = "github:montagejs/collections/v5.1.12";
+      flake = false;
+    };
     flake-utils.url = "github:numtide/flake-utils";
     naersk = {
       url = "github:nmattia/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    weak-map = {
+      url = "github:drses/weak-map/v1.0.5";
+      flake = false;
+    };
   };
 
-  outputs = { self, flake-utils, naersk, nixpkgs }:
+  outputs = { self, collections, flake-utils, naersk, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
@@ -65,6 +73,29 @@
               cp Main.class $out/share/java
               makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
                 --add-flags "-cp $out/share/java Main"
+            '';
+          };
+
+          javascript = pkgs.stdenv.mkDerivation {
+            name = "bst-javascript";
+            src = ./src/javascript;
+            buildInputs = with pkgs;
+              with nodePackages; [
+                nodejs
+                webpack
+                webpack-cli
+              ];
+            configurePhase = ''
+              mkdir -p node_modules
+              cp -r ${collections} node_modules/collections
+              cp -r ${weak-map} node_modules/weak-map
+            '';
+            buildPhase = "webpack";
+            installPhase = ''
+              mkdir -p $out/bin
+              echo "#!${pkgs.nodejs}/bin/node" > $out/bin/bst
+              cat dist/bst.js >> $out/bin/bst
+              chmod +x $out/bin/bst
             '';
           };
 

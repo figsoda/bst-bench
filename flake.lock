@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "collections": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1601012878,
+        "narHash": "sha256-XDos9ImIntwImJf/ZIGNeznbUPn/k/SUgYlAb/eP0U4=",
+        "owner": "montagejs",
+        "repo": "collections",
+        "rev": "f73d513e9df13232ca8f9d7bda7f2b6f72ca0a06",
+        "type": "github"
+      },
+      "original": {
+        "owner": "montagejs",
+        "ref": "v5.1.12",
+        "repo": "collections",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1605370193,
@@ -53,9 +70,28 @@
     },
     "root": {
       "inputs": {
+        "collections": "collections",
         "flake-utils": "flake-utils",
         "naersk": "naersk",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "weak-map": "weak-map"
+      }
+    },
+    "weak-map": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1401331345,
+        "narHash": "sha256-sucaecofluP3Lkj3PTIBc9O1oHMscylpIVpzlbk5XYU=",
+        "owner": "drses",
+        "repo": "weak-map",
+        "rev": "63e37049a800e754d65f4334b3a7c23fd75ece69",
+        "type": "github"
+      },
+      "original": {
+        "owner": "drses",
+        "ref": "v1.0.5",
+        "repo": "weak-map",
+        "type": "github"
       }
     }
   },
