@@ -50,6 +50,18 @@
               cp bst $out/bin
             '';
           };
+          java = pkgs.stdenv.mkDerivation {
+            name = "bst-java";
+            src = ./src/java;
+            buildInputs = with pkgs; [ jdk makeWrapper ];
+            buildPhase = "javac Main.java";
+            installPhase = ''
+              mkdir -p $out/{bin,share/java}
+              cp Main.class $out/share/java
+              makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
+                --add-flags "-cp $out/share/java Main"
+            '';
+          };
           python = pkgs.writeTextFile {
             name = "bst-python";
             destination = "/bin/bst";
