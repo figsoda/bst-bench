@@ -50,6 +50,16 @@
               cp bst $out/bin
             '';
           };
+          python = pkgs.writeTextFile {
+            name = "bst-python";
+            destination = "/bin/bst";
+            executable = true;
+            text = ''
+              #!${pkgs.python3.withPackages (ps: [ ps.BTrees ])}/bin/python
+
+              ${readFile ./src/python/main.py}
+            '';
+          };
           rust = naersk.lib.${system}.buildPackage {
             name = "bst-rust";
             src = ./src/rust;
