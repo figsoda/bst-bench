@@ -20,7 +20,6 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
-
         defaultPackage = pkgs.writeScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
             -w 3 -r 32 \
@@ -99,14 +98,29 @@
             '';
           };
 
-          python = pkgs.writeTextFile {
+          # pypy.withPackages is broken
+          # https://github.com/NixOS/nixpkgs/issues/39356
+          python = pkgs.stdenv.mkDerivation {
             name = "bst-python";
-            destination = "/bin/bst";
-            executable = true;
-            text = ''
-              #!${pkgs.python3.withPackages (ps: [ ps.BTrees ])}/bin/python
-
-              ${readFile ./src/python/main.py}
+            src = ./src/python;
+            installPhase = ''
+              mkdir -p $out/bin
+              echo "#!${pkgs.pypy3}/bin/pypy3" > $out/bin/bst
+              echo "import sys" >> $out/bin/bst
+              echo 'sys.path.insert(1, "${
+                with pkgs.pypy3Packages;
+                buildPythonPackage rec {
+                  pname = "bintrees";
+                  version = "2.2.0";
+                  src = fetchPypi {
+                    inherit pname version;
+                    extension = "zip";
+                    sha256 = "4YBljZB4mFXcsOfR6yv+vEUtYMW0jnTeFrUC1hqDUtE=";
+                  };
+                }
+              }/site-packages")' >> $out/bin/bst
+              cat main.py >> $out/bin/bst
+              chmod +x $out/bin/bst
             '';
           };
 

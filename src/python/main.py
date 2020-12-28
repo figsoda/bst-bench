@@ -1,6 +1,6 @@
-from BTrees.QQBTree import QQTreeSet
+from bintrees.rbtree import RBTree
 
-xs = QQTreeSet()
+xs = RBTree()
 for i in range(0, 1000000):
-    xs.insert(i)
+    xs.insert(i, ())
 print(len(xs))
