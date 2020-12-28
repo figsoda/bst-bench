@@ -20,7 +20,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
-        defaultPackage = pkgs.writeScriptBin "bst-bench" ''
+        defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
             -w 3 -r 32 \
             -s none \
@@ -100,30 +100,25 @@
 
           # pypy.withPackages is broken
           # https://github.com/NixOS/nixpkgs/issues/39356
-          python = pkgs.writeTextFile {
-            name = "bst-python";
-            destination = "/bin/bst";
-            executable = true;
-            text = ''
-              #!${pkgs.pypy3}/bin/pypy3 -OO
+          python = pkgs.writeScriptBin "bst" ''
+            #!${pkgs.pypy3}/bin/pypy3 -OO
 
-              import sys
-              sys.path.insert(1, "${
-                with pkgs.pypy3Packages;
-                buildPythonPackage rec {
-                  pname = "bintrees";
-                  version = "2.2.0";
-                  src = fetchPypi {
-                    inherit pname version;
-                    extension = "zip";
-                    sha256 = "4YBljZB4mFXcsOfR6yv+vEUtYMW0jnTeFrUC1hqDUtE=";
-                  };
-                }
-              }/site-packages")
+            import sys
+            sys.path.insert(1, "${
+              with pkgs.pypy3Packages;
+              buildPythonPackage rec {
+                pname = "bintrees";
+                version = "2.2.0";
+                src = fetchPypi {
+                  inherit pname version;
+                  extension = "zip";
+                  sha256 = "4YBljZB4mFXcsOfR6yv+vEUtYMW0jnTeFrUC1hqDUtE=";
+                };
+              }
+            }/site-packages")
 
-              ${readFile ./src/python/main.py}
-            '';
-          };
+            ${readFile ./src/python/main.py}
+          '';
 
           rust = naersk.lib.${system}.buildPackage {
             name = "bst-rust";
