@@ -120,6 +120,12 @@
             ${readFile ./src/python/main.py}
           '';
 
+          ruby = pkgs.writeScriptBin "bst" ''
+            #!${pkgs.ruby}/bin/ruby --disable=gems,did_you_mean,rubyopt
+
+            ${readFile ./src/ruby/main.rb}
+          '';
+
           rust = naersk.lib.${system}.buildPackage {
             name = "bst-rust";
             src = ./src/rust;
