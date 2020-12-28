@@ -100,14 +100,15 @@
 
           # pypy.withPackages is broken
           # https://github.com/NixOS/nixpkgs/issues/39356
-          python = pkgs.stdenv.mkDerivation {
+          python = pkgs.writeTextFile {
             name = "bst-python";
-            src = ./src/python;
-            installPhase = ''
-              mkdir -p $out/bin
-              echo "#!${pkgs.pypy3}/bin/pypy3" > $out/bin/bst
-              echo "import sys" >> $out/bin/bst
-              echo 'sys.path.insert(1, "${
+            destination = "/bin/bst";
+            executable = true;
+            text = ''
+              #!${pkgs.pypy3}/bin/pypy3
+
+              import sys
+              sys.path.insert(1, "${
                 with pkgs.pypy3Packages;
                 buildPythonPackage rec {
                   pname = "bintrees";
@@ -118,9 +119,9 @@
                     sha256 = "4YBljZB4mFXcsOfR6yv+vEUtYMW0jnTeFrUC1hqDUtE=";
                   };
                 }
-              }/site-packages")' >> $out/bin/bst
-              cat main.py >> $out/bin/bst
-              chmod +x $out/bin/bst
+              }/site-packages")
+
+              ${readFile ./src/python/main.py}
             '';
           };
 
