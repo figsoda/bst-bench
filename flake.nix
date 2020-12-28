@@ -105,7 +105,7 @@
             destination = "/bin/bst";
             executable = true;
             text = ''
-              #!${pkgs.pypy3}/bin/pypy3
+              #!${pkgs.pypy3}/bin/pypy3 -OO
 
               import sys
               sys.path.insert(1, "${
