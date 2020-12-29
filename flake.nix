@@ -20,9 +20,18 @@
     };
   };
 
-  outputs = { self, bintrees, collections, flake-utils, naersk, nixpkgs, weak-map }:
+  outputs =
+    { self, bintrees, collections, flake-utils, naersk, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system};
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        mkDerivation = args:
+          pkgs.stdenv.mkDerivation ({
+            installPhase = ''
+              mkdir -p $out/bin
+              cp bst $out/bin
+            '';
+          } // args);
       in with builtins; rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
@@ -44,25 +53,17 @@
         }) packages;
 
         packages = {
-          cpp-clang = pkgs.stdenv.mkDerivation {
+          cpp-clang = mkDerivation {
             name = "bst-cpp-clang";
             src = ./src/cpp;
             buildInputs = [ pkgs.clang ];
             buildPhase = "clang++ main.cc -O3 -flto -o bst";
-            installPhase = ''
-              mkdir -p $out/bin
-              cp bst $out/bin
-            '';
           };
 
-          cpp-gcc = pkgs.stdenv.mkDerivation {
+          cpp-gcc = mkDerivation {
             name = "bst-cpp-gcc";
             src = ./src/cpp;
             buildPhase = "g++ main.cc -O3 -flto -o bst";
-            installPhase = ''
-              mkdir -p $out/bin
-              cp bst $out/bin
-            '';
           };
 
           go = pkgs.buildGoModule rec {
@@ -74,20 +75,16 @@
             vendorSha256 = "ftiIGuIlyr766TClPwP9NYhPZqneWI+Sk2f7doR/YsA=";
           };
 
-          haskell = pkgs.stdenv.mkDerivation {
+          haskell = mkDerivation {
             name = "bst-haskell";
             src = ./src/haskell;
             buildInputs = [
               (pkgs.haskellPackages.ghcWithPackages (ps: [ ps.containers ]))
             ];
             buildPhase = "ghc Main.hs -O2 -o bst";
-            installPhase = ''
-              mkdir -p $out/bin
-              cp bst $out/bin
-            '';
           };
 
-          java = pkgs.stdenv.mkDerivation {
+          java = mkDerivation {
             name = "bst-java";
             src = ./src/java;
             buildInputs = with pkgs; [ jdk makeWrapper ];
@@ -100,7 +97,7 @@
             '';
           };
 
-          javascript-deno = pkgs.stdenv.mkDerivation {
+          javascript-deno = mkDerivation {
             name = "bst-javascript-deno";
             src = ./src/javascript;
             buildInputs = with pkgs;
@@ -123,7 +120,7 @@
             '';
           };
 
-          javascript-node = pkgs.stdenv.mkDerivation {
+          javascript-node = mkDerivation {
             name = "bst-javascript-node";
             src = ./src/javascript;
             buildInputs = with pkgs;
@@ -159,7 +156,6 @@
           # https://github.com/NixOS/nixpkgs/issues/39356
           python = pkgs.writeScriptBin "bst" ''
             #!${pkgs.pypy3}/bin/pypy3 -OO
-
             import sys
             sys.path.insert(1, "${
               pkgs.pypy3Packages.buildPythonPackage {
@@ -167,13 +163,11 @@
                 src = bintrees;
               }
             }/site-packages")
-
             ${readFile ./src/python/main.py}
           '';
 
           ruby = pkgs.writeScriptBin "bst" ''
             #!${pkgs.ruby}/bin/ruby --disable=gems,did_you_mean,rubyopt
-
             ${readFile ./src/ruby/main.rb}
           '';
 
