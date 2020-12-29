@@ -40,8 +40,19 @@
         }) packages;
 
         packages = {
-          cpp = pkgs.stdenv.mkDerivation {
-            name = "bst-cpp";
+          cpp-clang = pkgs.stdenv.mkDerivation {
+            name = "bst-cpp-clang";
+            src = ./src/cpp;
+            buildInputs = [ pkgs.clang ];
+            buildPhase = "clang++ main.cc -O3 -o bst";
+            installPhase = ''
+              mkdir -p $out/bin
+              cp bst $out/bin
+            '';
+          };
+
+          cpp-gcc = pkgs.stdenv.mkDerivation {
+            name = "bst-cpp-gcc";
             src = ./src/cpp;
             buildPhase = "g++ main.cc -O3 -o bst";
             installPhase = ''
