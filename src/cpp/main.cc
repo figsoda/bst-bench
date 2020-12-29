@@ -1,6 +1,7 @@
-#include <cstdint>
 #include <iostream>
 #include <set>
+
+using std::uint64_t;
 
 int main() {
     std::set<uint64_t, std::greater<uint64_t>> set;
