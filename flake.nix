@@ -40,6 +40,16 @@
         }) packages;
 
         packages = {
+          cpp = pkgs.stdenv.mkDerivation {
+            name = "bst-cpp";
+            src = ./src/cpp;
+            buildPhase = "g++ main.cc -O3 -o bst";
+            installPhase = ''
+              mkdir -p $out/bin
+              cp bst $out/bin
+            '';
+          };
+
           go = pkgs.buildGoModule rec {
             name = "bst-go";
             src = builtins.path {
