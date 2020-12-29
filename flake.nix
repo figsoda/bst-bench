@@ -98,6 +98,29 @@
             '';
           };
 
+          javascript-deno = pkgs.stdenv.mkDerivation {
+            name = "bst-javascript-deno";
+            src = ./src/javascript;
+            buildInputs = with pkgs;
+              with nodePackages; [
+                nodejs
+                webpack
+                webpack-cli
+              ];
+            configurePhase = ''
+              mkdir -p node_modules
+              cp -r ${collections} node_modules/collections
+              cp -r ${weak-map} node_modules/weak-map
+            '';
+            buildPhase = "webpack";
+            installPhase = ''
+              mkdir -p $out/bin
+              echo "#!${pkgs.deno}/bin/deno run" > $out/bin/bst
+              cat dist/bst.js >> $out/bin/bst
+              chmod +x $out/bin/bst
+            '';
+          };
+
           ocaml = with pkgs.ocamlPackages; buildDunePackage rec {
             pname = "bst-ocaml";
             version = "0.1.0";
