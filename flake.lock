@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "bintrees": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1607762717,
+        "narHash": "sha256-/4GQ/wgr3LQBNlHJlkRJy/Mb6/P6s0pcxKScZzUhPBg=",
+        "owner": "mozman",
+        "repo": "bintrees",
+        "rev": "c837433bfe0846888b16cb3ddcd86935dd67417c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mozman",
+        "ref": "v2.2.0",
+        "repo": "bintrees",
+        "type": "github"
+      }
+    },
     "collections": {
       "flake": false,
       "locked": {
@@ -70,6 +87,7 @@
     },
     "root": {
       "inputs": {
+        "bintrees": "bintrees",
         "collections": "collections",
         "flake-utils": "flake-utils",
         "naersk": "naersk",

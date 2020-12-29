@@ -1,5 +1,9 @@
 {
   inputs = {
+    bintrees = {
+      url = "github:mozman/bintrees/v2.2.0";
+      flake = false;
+    };
     collections = {
       url = "github:montagejs/collections/v5.1.12";
       flake = false;
@@ -16,7 +20,7 @@
     };
   };
 
-  outputs = { self, collections, flake-utils, naersk, nixpkgs, weak-map }:
+  outputs = { self, bintrees, collections, flake-utils, naersk, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
@@ -158,15 +162,9 @@
 
             import sys
             sys.path.insert(1, "${
-              with pkgs.pypy3Packages;
-              buildPythonPackage rec {
-                pname = "bintrees";
-                version = "2.2.0";
-                src = fetchPypi {
-                  inherit pname version;
-                  extension = "zip";
-                  sha256 = "4YBljZB4mFXcsOfR6yv+vEUtYMW0jnTeFrUC1hqDUtE=";
-                };
+              pkgs.pypy3Packages.buildPythonPackage {
+                name = "bintrees";
+                src = bintrees;
               }
             }/site-packages")
 
