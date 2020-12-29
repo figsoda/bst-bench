@@ -98,6 +98,14 @@
             '';
           };
 
+          ocaml = with pkgs.ocamlPackages; buildDunePackage rec {
+            pname = "bst-ocaml";
+            version = "0.1.0";
+            src = ./src/ocaml;
+            buildInputs = [ iter ];
+            useDune2 = true;
+          };
+
           # pypy.withPackages is broken
           # https://github.com/NixOS/nixpkgs/issues/39356
           python = pkgs.writeScriptBin "bst" ''
