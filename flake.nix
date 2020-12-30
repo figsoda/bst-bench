@@ -66,6 +66,19 @@
             buildPhase = "g++ main.cc -O3 -flto -o bst";
           };
 
+          csharp = mkDerivation {
+            name = "bst-csharp";
+            src = ./src/csharp;
+            buildInputs = with pkgs; [ makeWrapper mono6 ];
+            buildPhase = "mcs bst.cs -o+";
+            installPhase = ''
+              mkdir -p $out/{bin,share/mono}
+              cp bst.exe $out/share/mono
+              makeWrapper ${pkgs.mono6}/bin/mono $out/bin/bst \
+                --add-flags $out/share/mono/bst.exe
+            '';
+          };
+
           go = pkgs.buildGoModule rec {
             name = "bst-go";
             src = builtins.path {
