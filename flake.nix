@@ -43,7 +43,7 @@
             --export-markdown results.md \
             ${
               concatStringsSep " "
-              (attrValues (mapAttrs (k: v: "-n ${k} ${v.program}") apps))
+              (nixpkgs.lib.mapAttrsFlatten (k: v: "-n ${k} ${v.program}") apps)
             }
         '';
 
