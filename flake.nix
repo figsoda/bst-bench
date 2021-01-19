@@ -16,8 +16,7 @@
     };
   };
 
-  outputs =
-    { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
+  outputs = { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -30,18 +29,15 @@
           } // args);
       in with builtins; rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
-          ${
-            concatStringsSep ""
-            (nixpkgs.lib.mapAttrsFlatten (k: v: ''
-              RESULT=$(${v.program})
-              if [ "$RESULT" != 1000000 ]; then
-                echo "${k} failed the test"
-                echo "Expected output: 1000000"
-                echo "Actual output:   $RESULT"
-                exit 1
-              fi
-            '') apps)
-          }
+          ${concatStringsSep "" (nixpkgs.lib.mapAttrsFlatten (k: v: ''
+            RESULT=$(${v.program})
+            if [ "$RESULT" != 1000000 ]; then
+              echo "${k} failed the test"
+              echo "Expected output: 1000000"
+              echo "Actual output:   $RESULT"
+              exit 1
+            fi
+          '') apps)}
 
           ${pkgs.hyperfine}/bin/hyperfine \
             -w "${"$"}{1:-1}" -r "${"$"}{2:-2}" \
