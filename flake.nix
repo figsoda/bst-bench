@@ -9,10 +9,6 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    naersk = {
-      url = "github:nmattia/naersk";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     weak-map = {
       url = "github:drses/weak-map/v1.0.5";
@@ -21,7 +17,7 @@
   };
 
   outputs =
-    { self, bintrees, collections, flake-utils, naersk, nixpkgs, weak-map }:
+    { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -196,9 +192,15 @@
             ${readFile ./src/ruby/main.rb}
           '';
 
-          rust = naersk.lib.${system}.buildPackage {
+          rust = pkgs.stdenv.mkDerivation {
             name = "bst-rust";
             src = ./src/rust;
+            buildInputs = [ pkgs.rustc ];
+            installPhase = ''
+              mkdir -p $out/bin
+              rustc main.rs -o $out/bin/bst --edition 2018 \
+                -C{opt-level=3,panic=abort,lto,codegen-units=1,target-cpu=native}
+            '';
           };
         };
       });
