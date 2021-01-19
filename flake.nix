@@ -36,7 +36,6 @@
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
             -w "${"$"}{1:-1}" -r "${"$"}{2:-2}" \
-            -s none \
             -S ${pkgs.dash}/bin/dash \
             -u millisecond \
             --export-json results.json \
