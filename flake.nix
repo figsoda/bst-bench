@@ -35,7 +35,7 @@
       in with builtins; rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${pkgs.hyperfine}/bin/hyperfine \
-            -w 3 -r 32 \
+            -w "${"$"}{1:-1}" -r "${"$"}{2:-2}" \
             -s none \
             -S ${pkgs.dash}/bin/dash \
             -u millisecond \
