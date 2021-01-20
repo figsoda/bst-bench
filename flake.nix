@@ -18,15 +18,7 @@
 
   outputs = { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-        mkDerivation = args:
-          pkgs.stdenv.mkDerivation ({
-            installPhase = ''
-              mkdir -p $out/bin
-              cp bst $out/bin
-            '';
-          } // args);
+      let pkgs = nixpkgs.legacyPackages.${system};
       in with builtins; rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${concatStringsSep "" (nixpkgs.lib.mapAttrsFlatten (k: v: ''
@@ -57,29 +49,34 @@
         }) packages;
 
         packages = {
-          cpp-clang = mkDerivation {
+          cpp-clang = pkgs.stdenv.mkDerivation {
             name = "bst-cpp-clang";
             src = ./src/cpp;
             buildInputs = [ pkgs.clang ];
-            buildPhase = "clang++ main.cc -O3 -flto -o bst";
+            installPhase = ''
+              mkdir -p $out/bin
+              clang++ main.cc -O3 -flto -o $out/bin/bst
+            '';
           };
 
-          cpp-gcc = mkDerivation {
+          cpp-gcc = pkgs.stdenv.mkDerivation {
             name = "bst-cpp-gcc";
             src = ./src/cpp;
-            buildPhase = "g++ main.cc -O3 -flto -o bst";
+            installPhase = ''
+              mkdir -p $out/bin
+              g++ main.cc -O3 -flto -o $out/bin/bst
+            '';
           };
 
-          csharp = mkDerivation {
+          csharp = pkgs.stdenv.mkDerivation {
             name = "bst-csharp";
             src = ./src/csharp;
             buildInputs = with pkgs; [ makeWrapper mono6 ];
-            buildPhase = "mcs bst.cs -o+";
             installPhase = ''
-              mkdir -p $out/{bin,share/mono}
-              cp bst.exe $out/share/mono
+              mkdir -p $out/{bin,share}
+              mcs main.cs -o+ -out:$out/share/bst.exe
               makeWrapper ${pkgs.mono6}/bin/mono $out/bin/bst \
-                --add-flags $out/share/mono/bst.exe
+                --add-flags $out/share/bst.exe
             '';
           };
 
@@ -92,29 +89,31 @@
             vendorSha256 = "ftiIGuIlyr766TClPwP9NYhPZqneWI+Sk2f7doR/YsA=";
           };
 
-          haskell = mkDerivation {
+          haskell = pkgs.stdenv.mkDerivation {
             name = "bst-haskell";
             src = ./src/haskell;
             buildInputs = [
               (pkgs.haskellPackages.ghcWithPackages (ps: [ ps.containers ]))
             ];
-            buildPhase = "ghc Main.hs -O2 -o bst";
-          };
-
-          java = mkDerivation {
-            name = "bst-java";
-            src = ./src/java;
-            buildInputs = with pkgs; [ jdk makeWrapper ];
-            buildPhase = "javac Main.java";
             installPhase = ''
-              mkdir -p $out/{bin,share/java}
-              cp Main.class $out/share/java
-              makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
-                --add-flags "-cp $out/share/java Main"
+              mkdir -p $out/bin
+              ghc Main.hs -O2 -o $out/bin/bst
             '';
           };
 
-          javascript-deno = mkDerivation {
+          java = pkgs.stdenv.mkDerivation {
+            name = "bst-java";
+            src = ./src/java;
+            buildInputs = with pkgs; [ jdk makeWrapper ];
+            installPhase = ''
+              mkdir -p $out/{bin,share}
+              javac Main.java -d $out/share
+              makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
+                --add-flags "-cp $out/share Main"
+            '';
+          };
+
+          javascript-deno = pkgs.stdenv.mkDerivation {
             name = "bst-javascript-deno";
             src = ./src/javascript;
             buildInputs = with pkgs;
@@ -137,7 +136,7 @@
             '';
           };
 
-          javascript-node = mkDerivation {
+          javascript-node = pkgs.stdenv.mkDerivation {
             name = "bst-javascript-node";
             src = ./src/javascript;
             buildInputs = with pkgs;
