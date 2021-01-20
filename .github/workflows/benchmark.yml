@@ -25,7 +25,10 @@ jobs:
           extra_nix_config: experimental-features = flakes nix-command
 
       - name: Run benchmarks
-        run: nix run ${{ github.event.inputs.warmup }} ${{ github.events.inputs.runs }}
+        run: |
+          nix run . \
+            "${{ github.event.inputs.warmup }}" \
+            "${{ github.events.inputs.runs }}"
 
       - name: Upload results
         uses: actions/upload-artifact@v2
