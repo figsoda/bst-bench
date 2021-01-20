@@ -26,14 +26,12 @@ jobs:
 
       - name: Run benchmarks
         run: |
-          nix run . \
-            "${{ github.event.inputs.warmup }}" \
-            "${{ github.event.inputs.runs }}"
+          nix run . "${{ github.event.inputs.warmup }}" "${{ github.event.inputs.runs }}"
 
       - name: Upload results
         uses: actions/upload-artifact@v2
         with:
-          name: Benchmark results
+          name: results
           path: |
             results.json
             results.md
