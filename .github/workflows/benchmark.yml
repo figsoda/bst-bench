@@ -28,7 +28,7 @@ jobs:
         run: |
           nix run . \
             "${{ github.event.inputs.warmup }}" \
-            "${{ github.events.inputs.runs }}"
+            "${{ github.event.inputs.runs }}"
 
       - name: Upload results
         uses: actions/upload-artifact@v2
