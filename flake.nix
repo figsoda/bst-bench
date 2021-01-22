@@ -68,8 +68,22 @@
             '';
           };
 
-          csharp = pkgs.stdenv.mkDerivation {
-            name = "bst-csharp";
+          csharp-dotnet = pkgs.stdenv.mkDerivation {
+            name = "bst-csharp-dotnet";
+            src = ./src/csharp;
+            buildInputs = with pkgs; [ dotnet-sdk_5 makeWrapper ];
+            installPhase = ''
+              mkdir -p $out/{bin,share}
+              dotnet build -c Release -o $out/share
+              makeWrapper ${pkgs.dotnetCorePackages.net_5_0}/bin/dotnet \
+                $out/bin/bst --add-flags $out/share/bst.dll
+            '';
+            DOTNET_CLI_HOME = ".home";
+            DOTNET_CLI_TELEMETRY_OUTPUT = "1";
+          };
+
+          csharp-mono = pkgs.stdenv.mkDerivation {
+            name = "bst-csharp-mono";
             src = ./src/csharp;
             buildInputs = with pkgs; [ makeWrapper mono6 ];
             installPhase = ''
