@@ -30,8 +30,9 @@
               makeWrapper
             ];
             installPhase = ''
-              mkdir -p $out/{bin,share}
-              nuget sources Disable -Name nuget.org
+              export HOME=$(mktemp -d)
+              mkdir -p $out/bin
+              dotnet nuget disable source nuget.org
               ${concatStringsSep "\n" (map ({ name, version, sha256 }:
                 "nuget add ${
                   fetchurl {
@@ -39,15 +40,14 @@
                     url =
                       "https://www.nuget.org/api/v2/package/${name}/${version}";
                   }
-                } -src local") (deps))}
-              dotnet restore -s local
+                } -src $HOME/nuget") (deps))}
+              dotnet restore -s $HOME/nuget
               dotnet build -c Release -o $out/share
               makeWrapper ${pkgs.dotnetCorePackages.net_5_0}/bin/dotnet \
                 $out/bin/bst --add-flags $out/share/bst.dll
             '';
             DOTNET_CLI_TELEMETRY_OPTOUT = "1";
             DOTNET_NOLOGO = "1";
-            HOME = ".home";
           };
       in rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
