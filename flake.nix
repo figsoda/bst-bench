@@ -18,8 +18,38 @@
 
   outputs = { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
     flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages.${system};
-      in with builtins; rec {
+      with builtins;
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        buildDotnetPackage = { name, src, deps ? [ ] }:
+          pkgs.stdenv.mkDerivation {
+            inherit name src;
+            buildInputs = with pkgs; [
+              dotnetCorePackages.sdk_5_0
+              dotnetPackages.Nuget
+              makeWrapper
+            ];
+            installPhase = ''
+              mkdir -p $out/{bin,share}
+              nuget sources Disable -Name nuget.org
+              ${concatStringsSep "\n" (map ({ name, version, sha256 }:
+                "nuget add ${
+                  fetchurl {
+                    inherit sha256;
+                    url =
+                      "https://www.nuget.org/api/v2/package/${name}/${version}";
+                  }
+                } -src local") (deps))}
+              dotnet restore -s local
+              dotnet build -c Release -o $out/share
+              makeWrapper ${pkgs.dotnetCorePackages.net_5_0}/bin/dotnet \
+                $out/bin/bst --add-flags $out/share/bst.dll
+            '';
+            DOTNET_CLI_TELEMETRY_OPTOUT = "1";
+            DOTNET_NOLOGO = "1";
+            HOME = ".home";
+          };
+      in rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${concatStringsSep "" (nixpkgs.lib.mapAttrsFlatten (k: v: ''
             RESULT=$(${v.program})
@@ -68,18 +98,9 @@
             '';
           };
 
-          csharp-dotnet = pkgs.stdenv.mkDerivation {
+          csharp-dotnet = buildDotnetPackage {
             name = "bst-csharp-dotnet";
             src = ./src/csharp;
-            buildInputs = with pkgs; [ dotnet-sdk_5 makeWrapper ];
-            installPhase = ''
-              mkdir -p $out/{bin,share}
-              dotnet build -c Release -o $out/share
-              makeWrapper ${pkgs.dotnetCorePackages.net_5_0}/bin/dotnet \
-                $out/bin/bst --add-flags $out/share/bst.dll
-            '';
-            DOTNET_CLI_HOME = ".home";
-            DOTNET_CLI_TELEMETRY_OPTOUT = "1";
           };
 
           csharp-mono = pkgs.stdenv.mkDerivation {
