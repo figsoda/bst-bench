@@ -79,7 +79,7 @@
                 $out/bin/bst --add-flags $out/share/bst.dll
             '';
             DOTNET_CLI_HOME = ".home";
-            DOTNET_CLI_TELEMETRY_OUTPUT = "1";
+            DOTNET_CLI_TELEMETRY_OPTOUT = "1";
           };
 
           csharp-mono = pkgs.stdenv.mkDerivation {
