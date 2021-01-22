@@ -40,7 +40,7 @@
                     url =
                       "https://www.nuget.org/api/v2/package/${name}/${version}";
                   }
-                } -src $HOME/nuget") (deps))}
+                } -src $HOME/nuget") deps)}
               dotnet restore -s $HOME/nuget
               dotnet build -c Release -o $out/share
               makeWrapper ${pkgs.dotnetCorePackages.net_5_0}/bin/dotnet \
@@ -62,7 +62,7 @@
           '') apps)}
 
           ${pkgs.hyperfine}/bin/hyperfine \
-            -w "${"$"}{1:-1}" -r "${"$"}{2:-2}" \
+            -w "''${1:-1}" -r "''${2:-2}" \
             -S ${pkgs.dash}/bin/dash \
             -u millisecond \
             --export-json results.json \
