@@ -115,6 +115,16 @@
             '';
           };
 
+          fsharp = buildDotnetPackage {
+            name = "bst-fsharp";
+            src = ./src/fsharp;
+            deps = [{
+              name = "FSharp.Core";
+              version = "5.0.0";
+              sha256 = "10qjk9rc950prnf7m8lndcr1qxihz4jcwzfrz8q7m5997h3zx28x";
+            }];
+          };
+
           go = pkgs.buildGoModule rec {
             name = "bst-go";
             src = builtins.path {
