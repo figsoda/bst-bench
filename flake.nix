@@ -208,7 +208,7 @@
             installPhase = ''
               mkdir -p $out/bin
               rustc main.rs -o $out/bin/bst --edition 2018 \
-                -C{opt-level=3,panic=abort,lto,codegen-units=1,target-cpu=native}
+                -C{opt-level=3,panic=abort,lto=fat,codegen-units=1,target-cpu=native}
             '';
           };
         };
