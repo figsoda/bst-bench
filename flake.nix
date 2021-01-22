@@ -173,6 +173,18 @@
             '';
           };
 
+          kotlin = pkgs.stdenv.mkDerivation {
+            name = "bst-kotlin";
+            src = ./src/kotlin;
+            buildInputs = with pkgs; [ kotlin makeWrapper ];
+            installPhase = ''
+              mkdir -p $out/{bin,share}
+              kotlinc main.kt -include-runtime -d $out/share/bst.jar
+              makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
+                --add-flags "-cp $out/share/bst.jar MainKt"
+            '';
+          };
+
           ocaml = with pkgs.ocamlPackages;
             buildDunePackage rec {
               pname = "bst-ocaml";
