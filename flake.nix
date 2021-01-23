@@ -254,6 +254,18 @@
                 -C{opt-level=3,panic=abort,lto=fat,codegen-units=1,target-cpu=native}
             '';
           };
+
+          scala = pkgs.stdenv.mkDerivation {
+            name = "bst-scala";
+            src = ./src/scala;
+            buildInputs = with pkgs; [ makeWrapper scala ];
+            installPhase = ''
+              mkdir -p $out/{bin,share}
+              scalac main.scala -opt:l:inline -d $out/share/bst.jar
+              makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
+                --add-flags "-cp $out/share/bst.jar:${pkgs.scala}/lib/scala-library.jar Main"
+            '';
+          };
         };
       });
 }
