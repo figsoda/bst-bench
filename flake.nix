@@ -212,7 +212,7 @@
               mkdir -p $out/{bin,share}
               kotlinc main.kt -include-runtime -d $out/share/bst.jar
               makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
-                --add-flags "-cp $out/share/bst.jar MainKt"
+                --add-flags "-jar $out/share/bst.jar"
             '';
           };
 
