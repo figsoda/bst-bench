@@ -270,10 +270,24 @@
               useDune2 = true;
             };
 
+          python-cpython = pkgs.writeScriptBin "bst" ''
+            #!${
+              (pkgs.python3.withPackages (ps:
+                [
+                  (ps.buildPythonPackage {
+                    name = "bintrees";
+                    src = bintrees;
+                    doCheck = false;
+                  })
+                ])).interpreter
+            } -OO
+            ${readFile ./src/python/main.py}
+          '';
+
           # pypy.withPackages is broken
           # https://github.com/NixOS/nixpkgs/issues/39356
-          python = pkgs.writeScriptBin "bst" ''
-            #!${pkgs.pypy3}/bin/pypy3 -OO
+          python-pypy = pkgs.writeScriptBin "bst" ''
+            #!${pkgs.pypy3.interpreter} -OO
             import sys
             sys.path.insert(1, "${
               pkgs.pypy3Packages.buildPythonPackage {
