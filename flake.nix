@@ -64,7 +64,7 @@
           ${pkgs.hyperfine}/bin/hyperfine \
             -w "''${1:-1}" -r "''${2:-2}" \
             -S ${pkgs.dash}/bin/dash \
-            -u millisecond \
+            -s basic -u millisecond \
             --export-json results.json \
             --export-markdown results.md \
             ${
