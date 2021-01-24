@@ -167,6 +167,30 @@
             '';
           };
 
+          idris-chez = pkgs.stdenv.mkDerivation {
+            name = "bst-idris-chez";
+            src = ./src/idris;
+            buildInputs = with pkgs; [ idris2 makeWrapper ];
+            installPhase = ''
+              mkdir -p $out/{bin,lib}
+              idris2 main.idr -p contrib -o bst
+              cp build/exec/bst_app/{bst,libidris2_support}.so $out/lib
+              makeWrapper $out/lib/bst.so $out/bin/bst \
+                --set LD_LIBRARY_PATH $out/lib
+            '';
+          };
+
+          idris-gambit = pkgs.stdenv.mkDerivation {
+            name = "bst-idris-gambit";
+            src = ./src/idris;
+            buildInputs = [ pkgs.idris2 ];
+            installPhase = ''
+              mkdir -p $out/bin
+              idris2 main.idr --cg gambit --output-dir $out/bin -o bst
+            '';
+            GAMBIT_GSC = "${pkgs.gambit}/bin/gsc";
+          };
+
           java = pkgs.stdenv.mkDerivation {
             name = "bst-java";
             src = ./src/java;
