@@ -115,6 +115,27 @@
             '';
           };
 
+          d-gdc = pkgs.stdenv.mkDerivation {
+            name = "bst-d-gdc";
+            src = ./src/d;
+            buildInputs = [ pkgs.gdc ];
+            installPhase = ''
+              mkdir -p $out/bin
+              gdc main.d -O3 -flto -o $out/bin/bst
+            '';
+          };
+
+          d-ldc = pkgs.stdenv.mkDerivation {
+            name = "bst-d-ldc";
+            src = ./src/d;
+            buildInputs = [ pkgs.ldc ];
+            installPhase = ''
+              mkdir -p $out/bin
+              ldc2 main.d -flto-binary=${pkgs.llvm_11}/lib/LLVMgold.so \
+                -O --flto=full --of $out/bin/bst
+            '';
+          };
+
           fsharp = buildDotnetPackage {
             name = "bst-fsharp";
             src = ./src/fsharp;
