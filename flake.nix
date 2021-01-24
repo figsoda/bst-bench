@@ -85,7 +85,7 @@
             buildInputs = [ pkgs.clang_11 ];
             installPhase = ''
               mkdir -p $out/bin
-              clang++ main.cc -O3 -flto -o $out/bin/bst
+              clang++ main.cc -std=c++20 -O3 -flto -o $out/bin/bst
             '';
           };
 
@@ -94,7 +94,7 @@
             src = ./src/cpp;
             installPhase = ''
               mkdir -p $out/bin
-              g++ main.cc -O3 -flto -o $out/bin/bst
+              g++ main.cc -std=c++20 -O3 -flto -o $out/bin/bst
             '';
           };
 
