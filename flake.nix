@@ -49,6 +49,30 @@
             DOTNET_CLI_TELEMETRY_OPTOUT = "1";
             DOTNET_NOLOGO = "1";
           };
+
+        buildJsPackage = variant: shebang:
+          pkgs.stdenv.mkDerivation {
+            name = "bst-javascript-${variant}";
+            src = ./src/javascript;
+            buildInputs = with pkgs;
+              with nodePackages; [
+                nodejs
+                webpack
+                webpack-cli
+              ];
+            configurePhase = ''
+              mkdir -p node_modules
+              cp -r ${collections} node_modules/collections
+              cp -r ${weak-map} node_modules/weak-map
+            '';
+            installPhase = ''
+              mkdir -p $out/bin
+              webpack --entry ./main.js --mode production
+              echo "#!${shebang}" > $out/bin/bst
+              cat dist/main.js >> $out/bin/bst
+              chmod +x $out/bin/bst
+            '';
+          };
       in rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${concatStringsSep "" (nixpkgs.lib.mapAttrsFlatten (k: v: ''
@@ -203,51 +227,9 @@
             '';
           };
 
-          javascript-deno = pkgs.stdenv.mkDerivation {
-            name = "bst-javascript-deno";
-            src = ./src/javascript;
-            buildInputs = with pkgs;
-              with nodePackages; [
-                nodejs
-                webpack
-                webpack-cli
-              ];
-            configurePhase = ''
-              mkdir -p node_modules
-              cp -r ${collections} node_modules/collections
-              cp -r ${weak-map} node_modules/weak-map
-            '';
-            buildPhase = "webpack";
-            installPhase = ''
-              mkdir -p $out/bin
-              echo "#!${pkgs.deno}/bin/deno run" > $out/bin/bst
-              cat dist/bst.js >> $out/bin/bst
-              chmod +x $out/bin/bst
-            '';
-          };
+          javascript-deno = buildJsPackage "deno" "${pkgs.deno}/bin/deno run";
 
-          javascript-node = pkgs.stdenv.mkDerivation {
-            name = "bst-javascript-node";
-            src = ./src/javascript;
-            buildInputs = with pkgs;
-              with nodePackages; [
-                nodejs
-                webpack
-                webpack-cli
-              ];
-            configurePhase = ''
-              mkdir -p node_modules
-              cp -r ${collections} node_modules/collections
-              cp -r ${weak-map} node_modules/weak-map
-            '';
-            buildPhase = "webpack";
-            installPhase = ''
-              mkdir -p $out/bin
-              echo "#!${pkgs.nodejs}/bin/node" > $out/bin/bst
-              cat dist/bst.js >> $out/bin/bst
-              chmod +x $out/bin/bst
-            '';
-          };
+          javascript-node = buildJsPackage "node" "${pkgs.nodejs}/bin/node";
 
           kotlin = pkgs.stdenv.mkDerivation {
             name = "bst-kotlin";
