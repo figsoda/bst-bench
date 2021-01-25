@@ -20,7 +20,7 @@
     };
   };
 
-  outputs = { flake-utils, naersk, nixpkgs, ... }:
+  outputs = inputs@{ flake-utils, naersk, nixpkgs, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       with builtins;
       let
@@ -76,6 +76,14 @@
               cat dist/main.js >> $out/bin/bst
               chmod +x $out/bin/bst
             '';
+          };
+
+        script = name: text:
+          pkgs.writeTextFile {
+            inherit text;
+            name = "bst-${name}";
+            destination = "/bin/bst";
+            executable = true;
           };
       in rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
@@ -256,7 +264,7 @@
               useDune2 = true;
             };
 
-          python-cpython = pkgs.writeScriptBin "bst" ''
+          python-cpython = script "python-cpython" ''
             #!${
               (pkgs.python3.withPackages (ps:
                 [
@@ -272,7 +280,7 @@
 
           # pypy.withPackages is broken
           # https://github.com/NixOS/nixpkgs/issues/39356
-          python-pypy = pkgs.writeScriptBin "bst" ''
+          python-pypy = script "python-pypy" ''
             #!${pkgs.pypy3.interpreter} -OO
             import sys
             sys.path.insert(1, "${
@@ -284,7 +292,7 @@
             ${readFile ./src/python/main.py}
           '';
 
-          ruby = pkgs.writeScriptBin "bst" ''
+          ruby = script "ruby" ''
             #!${pkgs.ruby}/bin/ruby --disable=gems,did_you_mean,rubyopt
             ${readFile ./src/ruby/main.rb}
           '';
