@@ -1,0 +1,12 @@
+[package]
+name = "bst"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+treez = "1.6.0"
+
+[profile.release]
+lto = true
+panic = "abort"
+codegen-units = 1

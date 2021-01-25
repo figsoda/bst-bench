@@ -9,6 +9,10 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
+    naersk = {
+      url = "github:nmattia/naersk";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     weak-map = {
       url = "github:drses/weak-map/v1.0.5";
@@ -16,7 +20,7 @@
     };
   };
 
-  outputs = { self, bintrees, collections, flake-utils, nixpkgs, weak-map }:
+  outputs = { flake-utils, naersk, nixpkgs, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       with builtins;
       let
@@ -62,8 +66,8 @@
               ];
             configurePhase = ''
               mkdir -p node_modules
-              cp -r ${collections} node_modules/collections
-              cp -r ${weak-map} node_modules/weak-map
+              cp -r ${inputs.collections} node_modules/collections
+              cp -r ${inputs.weak-map} node_modules/weak-map
             '';
             installPhase = ''
               mkdir -p $out/bin
@@ -258,7 +262,7 @@
                 [
                   (ps.buildPythonPackage {
                     name = "bintrees";
-                    src = bintrees;
+                    src = inputs.bintrees;
                     doCheck = false;
                   })
                 ])).interpreter
@@ -274,7 +278,7 @@
             sys.path.insert(1, "${
               pkgs.pypy3Packages.buildPythonPackage {
                 name = "bintrees";
-                src = bintrees;
+                src = inputs.bintrees;
               }
             }/site-packages")
             ${readFile ./src/python/main.py}
@@ -285,15 +289,10 @@
             ${readFile ./src/ruby/main.rb}
           '';
 
-          rust = pkgs.stdenv.mkDerivation {
-            name = "bst-rust";
+          rust = naersk.lib.${system}.buildPackage {
             src = ./src/rust;
-            buildInputs = [ pkgs.rustc ];
-            installPhase = ''
-              mkdir -p $out/bin
-              rustc main.rs -o $out/bin/bst --edition 2018 \
-                -C{opt-level=3,panic=abort,lto=fat,codegen-units=1,target-cpu=native}
-            '';
+            singleStep = true;
+            RUSTFLAGS = "-Ctarget-cpu=native";
           };
 
           scala = pkgs.stdenv.mkDerivation {
