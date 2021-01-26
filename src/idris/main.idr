@@ -27,9 +27,9 @@ insert s@(MkSet n t) = maybe s (MkSet $ S n) . ins t where
   ins : Tree a -> a -> Maybe (Tree a)
   ins Empty x = Just $ Node 1 x Empty Empty
   ins (Node n v l r) x = case compare x v of
-    LT => map (\t => split $ skew $ Node n v t r) $ ins l x
+    LT => map (split . skew . Node n v l) $ ins r x
     EQ => Nothing
-    GT => map (split . skew . Node n v l) $ ins r x
+    GT => map (\t => split $ skew $ Node n v t r) $ ins l x
 
 main : IO ()
 main = printLn $ count $ foldl insert empty [the Int 0 .. 999999]
