@@ -123,6 +123,7 @@
           cpp-gcc = pkgs.stdenv.mkDerivation {
             name = "bst-cpp-gcc";
             src = ./src/cpp;
+            buildInputs = [ pkgs.gcc ];
             installPhase = ''
               mkdir -p $out/bin
               g++ main.cc -std=c++20 -O3 -flto -o $out/bin/bst
