@@ -147,15 +147,18 @@
             '';
           };
 
-          d-gdc = pkgs.stdenv.mkDerivation {
-            name = "bst-d-gdc";
-            src = ./src/d;
-            buildInputs = [ pkgs.gdc ];
-            installPhase = ''
-              mkdir -p $out/bin
-              gdc main.d -O3 -flto -o $out/bin/bst
-            '';
-          };
+          d-gdc = if system == "x86_64-darwin" then
+            null
+          else
+            pkgs.stdenv.mkDerivation {
+              name = "bst-d-gdc";
+              src = ./src/d;
+              buildInputs = [ pkgs.gdc ];
+              installPhase = ''
+                mkdir -p $out/bin
+                gdc main.d -O3 -flto -o $out/bin/bst
+              '';
+            };
 
           d-ldc = pkgs.stdenv.mkDerivation {
             name = "bst-d-ldc";
