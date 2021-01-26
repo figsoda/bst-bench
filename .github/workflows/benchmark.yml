@@ -16,7 +16,7 @@ on:
 jobs:
   benchmark:
     name: benchmark
-    runs-on: ${{ github.events.inputs.os }}
+    runs-on: ${{ github.event.inputs.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
