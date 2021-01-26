@@ -189,7 +189,7 @@
             installPhase = ''
               mkdir -p $out/{bin,lib}
               idris2 main.idr -p contrib -o bst
-              cp build/exec/bst_app/{bst,libidris2_support}.so $out/lib
+              cp build/exec/bst_app/{bst.so,libidris2_support.*} $out/lib
               makeWrapper $out/lib/bst.so $out/bin/bst \
                 --set LD_LIBRARY_PATH $out/lib
             '';
