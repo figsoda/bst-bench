@@ -147,19 +147,6 @@
             '';
           };
 
-          d-gdc = if system == "x86_64-darwin" then
-            null
-          else
-            pkgs.stdenv.mkDerivation {
-              name = "bst-d-gdc";
-              src = ./src/d;
-              buildInputs = [ pkgs.gdc ];
-              installPhase = ''
-                mkdir -p $out/bin
-                gdc main.d -O3 -flto -o $out/bin/bst
-              '';
-            };
-
           d-ldc = pkgs.stdenv.mkDerivation {
             name = "bst-d-ldc";
             src = ./src/d;
@@ -320,6 +307,16 @@
               scalac main.scala -opt:l:inline -d $out/share/bst.jar
               makeWrapper ${pkgs.jre}/bin/java $out/bin/bst \
                 --add-flags "-cp $out/share/bst.jar:${pkgs.scala}/lib/scala-library.jar Main"
+            '';
+          };
+        } // nixpkgs.lib.optionalAttrs (system != "x86_64-darwin") {
+          d-gdc = pkgs.stdenv.mkDerivation {
+            name = "bst-d-gdc";
+            src = ./src/d;
+            buildInputs = [ pkgs.gdc ];
+            installPhase = ''
+              mkdir -p $out/bin
+              gdc main.d -O3 -flto -o $out/bin/bst
             '';
           };
         };
