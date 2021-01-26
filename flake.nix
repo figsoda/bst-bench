@@ -83,14 +83,18 @@
       in rec {
         defaultPackage = pkgs.writeShellScriptBin "bst-bench" ''
           ${concatStringsSep "" (nixpkgs.lib.mapAttrsFlatten (k: v: ''
-            RESULT=$(${v.program})
-            if [ "$RESULT" != 1000000 ]; then
-              echo "${k} failed the test"
-              echo "Expected output: 1000000"
-              echo "Actual output:   $RESULT"
+            echo -n "Testing ${k} ..."
+            result=$(${v.program})
+            if [ "$result" = 1000000 ]; then
+              echo " passed"
+            else
+              echo " failed"
+              echo "Expected: 1000000"
+              echo "Actual:   $result"
               exit 1
             fi
           '') apps)}
+          echo
 
           ${pkgs.hyperfine}/bin/hyperfine \
             -w "''${1:-1}" -r "''${2:-2}" \
@@ -113,7 +117,7 @@
           cpp-clang = pkgs.stdenv.mkDerivation {
             name = "bst-cpp-clang";
             src = ./src/cpp;
-            buildInputs = [ pkgs.llvmPackages.clang ];
+            buildInputs = [ pkgs.llvmPackages_latest.clang ];
             installPhase = ''
               mkdir -p $out/bin
               clang++ main.cc -std=c++20 -O3 -flto -o $out/bin/bst
