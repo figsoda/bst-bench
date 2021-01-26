@@ -113,7 +113,7 @@
           cpp-clang = pkgs.stdenv.mkDerivation {
             name = "bst-cpp-clang";
             src = ./src/cpp;
-            buildInputs = [ pkgs.clang_11 ];
+            buildInputs = [ pkgs.llvmPackages.clang ];
             installPhase = ''
               mkdir -p $out/bin
               clang++ main.cc -std=c++20 -O3 -flto -o $out/bin/bst
