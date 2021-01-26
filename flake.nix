@@ -54,9 +54,9 @@
             DOTNET_NOLOGO = "1";
           };
 
-        buildJsPackage = variant: shebang:
+        buildJsPackage = name: installPhase:
           pkgs.stdenv.mkDerivation {
-            name = "bst-javascript-${variant}";
+            inherit name installPhase;
             src = ./src/javascript;
             buildInputs = with pkgs;
               with nodePackages; [
@@ -69,13 +69,8 @@
               cp -r ${inputs.collections} node_modules/collections
               cp -r ${inputs.weak-map} node_modules/weak-map
             '';
-            installPhase = ''
-              mkdir -p $out/bin
-              webpack --entry ./main.js --mode production
-              echo "#!${shebang}" > $out/bin/bst
-              cat dist/main.js >> $out/bin/bst
-              chmod +x $out/bin/bst
-            '';
+            buildPhase = "webpack --entry ./main.js --mode production";
+            dontStrip = true;
           };
 
         script = name: text:
@@ -239,9 +234,18 @@
             '';
           };
 
-          javascript-deno = buildJsPackage "deno" "${pkgs.deno}/bin/deno run";
+          javascript-deno = buildJsPackage "javascript-deno" ''
+            mkdir -p $out/bin
+            DENO_DIR=$(mktemp -d) ${pkgs.deno}/bin/deno \
+              compile --unstable dist/main.js -o $out/bin/bst
+          '';
 
-          javascript-node = buildJsPackage "node" "${pkgs.nodejs}/bin/node";
+          javascript-node = buildJsPackage "javascript-node" ''
+            mkdir -p $out/bin
+            echo "#!${pkgs.nodejs}/bin/node" > $out/bin/bst
+            cat dist/main.js >> $out/bin/bst
+            chmod +x $out/bin/bst
+          '';
 
           kotlin = pkgs.stdenv.mkDerivation {
             name = "bst-kotlin";
