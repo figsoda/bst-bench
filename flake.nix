@@ -157,8 +157,9 @@
             buildInputs = [ pkgs.ldc ];
             installPhase = ''
               mkdir -p $out/bin
-              ldc2 main.d -flto-binary=${pkgs.llvm_11}/lib/LLVMgold.so \
-                -O --flto=full --of $out/bin/bst
+              ldc2 main.d -flto-binary=${pkgs.llvmPackages_latest.llvm}/lib/${
+                if pkgs.stdenv.isDarwin then "libLTO.dylib" else "LLVMgold.so"
+              } -O --flto=full --of $out/bin/bst
             '';
           };
 
@@ -313,7 +314,7 @@
                 --add-flags "-cp $out/share/bst.jar:${pkgs.scala}/lib/scala-library.jar Main"
             '';
           };
-        } // nixpkgs.lib.optionalAttrs (system != "x86_64-darwin") {
+        } // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
           d-gdc = pkgs.stdenv.mkDerivation {
             name = "bst-d-gdc";
             src = ./src/d;
