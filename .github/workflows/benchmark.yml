@@ -3,9 +3,6 @@ name: benchmark
 on:
   workflow_dispatch:
     inputs:
-      os:
-        description: Operating system to run on
-        default: ubuntu-latest
       warmup:
         description: Number of warmup runs
         default: 5
@@ -16,7 +13,7 @@ on:
 jobs:
   benchmark:
     name: benchmark
-    runs-on: ${{ github.event.inputs.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
