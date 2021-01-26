@@ -151,18 +151,6 @@
             '';
           };
 
-          d-ldc = pkgs.stdenv.mkDerivation {
-            name = "bst-d-ldc";
-            src = ./src/d;
-            buildInputs = [ pkgs.ldc ];
-            installPhase = ''
-              mkdir -p $out/bin
-              ldc2 main.d -flto-binary=${pkgs.llvmPackages_latest.llvm}/lib/${
-                if pkgs.stdenv.isDarwin then "libLTO.dylib" else "LLVMgold.so"
-              } -O --flto=full --of $out/bin/bst
-            '';
-          };
-
           fsharp = buildDotnetPackage {
             name = "bst-fsharp";
             src = ./src/fsharp;
@@ -322,6 +310,17 @@
             installPhase = ''
               mkdir -p $out/bin
               gdc main.d -O3 -flto -o $out/bin/bst
+            '';
+          };
+
+          d-ldc = pkgs.stdenv.mkDerivation {
+            name = "bst-d-ldc";
+            src = ./src/d;
+            buildInputs = [ pkgs.ldc ];
+            installPhase = ''
+              mkdir -p $out/bin
+              ldc2 main.d -O --flto=full --of $out/bin/bst \
+                -flto-binary=${pkgs.llvmPackages_latest.llvm}/lib/LLVMgold.so
             '';
           };
         };
