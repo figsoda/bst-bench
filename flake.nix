@@ -172,6 +172,18 @@
           '';
         };
 
+        elixir = pkgs.stdenv.mkDerivation {
+          name = "bst-elixir";
+          src = ./src/elixir;
+          buildInputs = with pkgs; [ elixir makeWrapper ];
+          installPhase = ''
+            mkdir -p $out/{bin,share}
+            elixirc main.ex -o $out/share
+            makeWrapper ${pkgs.elixir}/bin/elixir $out/bin/bst \
+              --add-flags "-pz $out/share -e Main.main"
+          '';
+        };
+
         erlang = pkgs.stdenv.mkDerivation {
           name = "bst-erlang";
           src = ./src/erlang;
