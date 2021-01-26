@@ -172,6 +172,20 @@
           '';
         };
 
+        erlang = pkgs.stdenv.mkDerivation {
+          name = "bst-erlang";
+          src = ./src/erlang;
+          buildInputs = [ pkgs.erlang ];
+          installPhase = ''
+            mkdir -p $out/{bin,share}
+            erlc +native "+{hipe,[o3]}" -o $out/share main.erl
+            echo "#!${pkgs.runtimeShell}" > $out/bin/bst
+            echo "cd $out/share" >> $out/bin/bst
+            echo "${pkgs.erlang}/bin/erl -noinput -s main" >> $out/bin/bst
+            chmod +x $out/bin/bst
+          '';
+        };
+
         fsharp = buildDotnetPackage {
           name = "bst-fsharp";
           src = ./src/fsharp;
