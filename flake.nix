@@ -73,6 +73,26 @@
           dontStrip = true;
         };
 
+      buildRescriptPackage = name: installPhase:
+        pkgs.stdenv.mkDerivation {
+          inherit name installPhase;
+          src = ./src/rescript;
+          buildInputs = with pkgs;
+            with nodePackages; [
+              bs-platform
+              nodejs
+              webpack
+              webpack-cli
+            ];
+          buildPhase = ''
+            mkdir -p node_modules/bs-platform
+            ln -s ${pkgs.bs-platform}/lib node_modules/bs-platform
+            bsc main.res > main.js
+            webpack --entry ./main.js --mode production
+          '';
+          dontStrip = true;
+        };
+
       script = name: text:
         pkgs.writeTextFile {
           inherit text;
@@ -322,6 +342,19 @@
             }
           }/site-packages")
           ${readFile ./src/python/main.py}
+        '';
+
+        rescript-deno = buildRescriptPackage "rescript-deno" ''
+          mkdir -p $out/bin
+          DENO_DIR=$(mktemp -d) ${pkgs.deno}/bin/deno \
+            compile --unstable dist/main.js -o $out/bin/bst
+        '';
+
+        rescript-node = buildRescriptPackage "rescript-node" ''
+          mkdir -p $out/bin
+          echo "#!${pkgs.nodejs}/bin/node" > $out/bin/bst
+          cat dist/main.js >> $out/bin/bst
+          chmod +x $out/bin/bst
         '';
 
         ruby = script "ruby" ''
