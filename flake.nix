@@ -187,14 +187,12 @@
         erlang = pkgs.stdenv.mkDerivation {
           name = "bst-erlang";
           src = ./src/erlang;
-          buildInputs = [ pkgs.erlang ];
+          buildInputs = with pkgs; [ erlang makeWrapper ];
           installPhase = ''
             mkdir -p $out/{bin,share}
-            erlc +native "+{hipe,[o3]}" -o $out/share main.erl
-            echo "#!${pkgs.runtimeShell}" > $out/bin/bst
-            echo "cd $out/share" >> $out/bin/bst
-            echo "${pkgs.erlang}/bin/erl -noinput -s main" >> $out/bin/bst
-            chmod +x $out/bin/bst
+            erlc -o $out/share main.erl
+            makeWrapper ${pkgs.erlang}/bin/erl $out/bin/bst \
+              --add-flags "-noinput -pz $out/share -s main"
           '';
         };
 
