@@ -270,8 +270,20 @@
           GAMBIT_GSC = "${pkgs.gambit}/bin/gsc";
         };
 
-        java = pkgs.stdenv.mkDerivation {
-          name = "bst-java";
+        java-graal = pkgs.stdenv.mkDerivation {
+          name = "bst-java-graal";
+          src = ./src/java;
+          buildInputs = [ pkgs.graalvm11-ce ];
+          installPhase = ''
+            mkdir -p $out/bin
+            javac Main.java
+            native-image Main bst
+            cp bst $out/bin
+          '';
+        };
+
+        java-openjdk = pkgs.stdenv.mkDerivation {
+          name = "bst-java-openjdk";
           src = ./src/java;
           buildInputs = with pkgs; [ jdk makeWrapper ];
           installPhase = ''
@@ -295,8 +307,20 @@
           chmod +x $out/bin/bst
         '';
 
-        kotlin = pkgs.stdenv.mkDerivation {
-          name = "bst-kotlin";
+        kotlin-graal = pkgs.stdenv.mkDerivation {
+          name = "bst-kotlin-graal";
+          src = ./src/kotlin;
+          buildInputs = with pkgs; [ kotlin graalvm11-ce ];
+          installPhase = ''
+            mkdir -p $out/bin
+            kotlinc main.kt -include-runtime -d bst.jar
+            native-image -jar bst.jar
+            cp bst $out/bin
+          '';
+        };
+
+        kotlin-openjdk = pkgs.stdenv.mkDerivation {
+          name = "bst-kotlin-openjdk";
           src = ./src/kotlin;
           buildInputs = with pkgs; [ kotlin makeWrapper ];
           installPhase = ''
